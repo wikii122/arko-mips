@@ -51,9 +51,11 @@ main:
 	addiu	$a0	$a0	62			# Move to the interesting part of first file
 	addiu	$a1	$a1	62			# Move to the interesting part of second file
 	jal	counter_main			# Start counting
+	
 	la	$a0	array				# Array address for minimal
 	li	$a1	225				# Size for minimal
 	jal	minimal				# Find minimal hammings distance
+	
 	sw	$v0	minimum			# Save minimal value
 	
 	# Argument remain the same
@@ -71,6 +73,7 @@ main:
 	li	$v0	4				# Command to print
 	la	$a0	done				# String to be printed
 	syscall
+	
 exit:
 	li 	$v0	10				# Load exit command
 	syscall					# Exit
@@ -78,32 +81,38 @@ exit:
 ##########################	Population counter - $a0	- target,
 popcount:
 	move	$t1	$a0				# Load word to register
+	
 	lw	$t0	mask1			# Load first mask
 	srl	$t2	$t1	1			# Bit shift one right
 	and	$t3	$t0	$t1			# Apply mask
 	and	$t4	$t0	$t2			# Apply mask to shifted
 	addu	$t1	$t3	$t4			# Add results of applied masks
+	
 	lw	$t0	mask2			# Load second mask
 	srl	$t2	$t1	2			# Bitshift by two right
 	and	$t3	$t0	$t1			# Apply mask 
 	and	$t4	$t0	$t2			# Apply mask to shifted
 	addu	$t1	$t3	$t4			# Add results of applied masks
+	
 	lw	$t0	mask3			# Load third mask
 	srl	$t2	$t1	4			# Bitshift by 4 right
 	and	$t3	$t0	$t1			# Apply mask
 	and	$t4	$t0	$t2			# Apply mask to shifted
 	addu	$t1	$t3	$t4			# Add results of applied masks
+	
 	lw	$t0	mask4			# Load fourth mask
 	srl	$t2	$t1	8			# Bitshift by 8 right
 	and	$t3	$t0	$t1			# Apply mask
 	and	$t4	$t0	$t2			# Apply mask o shifted
 	addu	$t1	$t3	$t4			# Add results of applied masks
+	
 	lw	$t0	mask5			# Load fifth mask
 	srl	$t2	$t1	16			# Bitshift by 16 right
 	and	$t3	$t0	$t1			# Apply mask
 	and 	$t4	$t0	$t2			# Apply mask to shifted
 	addu	$t1	$t3	$t4			# Add results off applied masks
 	move	$v0	$t1				# Move result to $v0
+	
 	jr	$ra					# Return
 	
 #########################	Read file from memory - a0 - file name; a1 - memory address; a2 - size
@@ -194,6 +203,7 @@ cv_loop:
 	move	$a1	$s1
 	move	$a2	$s2
 	jal	counter_row
+	
 cv_continue:
 	addiu	$s0	$s0	8			# Move to next row
 	addiu	$s2	$s2	60			# Move to next line result position
@@ -247,31 +257,24 @@ cr_loop:
 	
 	jr	$ra
 counter_byte:
-	addi	$sp 	$sp 	-32			# Move stack pointer
+	addi	$sp 	$sp 	-24			# Move stack pointer
 	sw   	$s0 	($sp)				# Push to stack
 	sw   	$s1 	4($sp)			
 	sw   	$s2 	8($sp)			
 	sw   	$s3 	12($sp)		
-	sw   	$s4 	16($sp)			
-	sw	$s5	20($sp)
-	sw	$s6	24($sp)
-	sw	$ra	28($sp)
+	sw   	$s4 	16($sp)
+	sw	$ra	20($sp)
 	
-	lw	$s6	mask_byte
-	lb	$s0	($a0)				# Load given halfword, 
-	and	$s0	$s0	$s6			# as two bytes, in reversed order,
-	sll	$s0	$s0	8
-	lb	$s1	($a1)				
-	and	$s1	$s1	$s6			
-	sll	$s1	$s1	8
-	move	$s2	$a2				# Use of byte mask is required to 
-	addiu	$a0	$a0	1			# workaround JVM bug, 
-	addiu	$a1	$a1	1
-	lb	$t0	($a0)
-	and	$t0	$t0	$s6
+	lbu	$s0	($a0)				# Load given halfword, 
+	sll	$s0	$s0	8			# as two bytes, in reversed order,
+	lbu	$s1	($a1)				
+	sll	$s1	$s1	8			
+	move	$s2	$a2 				 
+	addiu	$a0	$a0	1			
+	addiu	$a1	$a1	1			
+	lbu	$t0	($a0)
 	addu	$s0	$s0	$t0
-	lb	$t0	($a1)
-	and	$t0	$t0	$s6
+	lbu	$t0	($a1)
 	addu	$s1	$s1	$t0
 	sll	$s0	$s0	8			# Initial movement
 	li	$s3	8				# Set loop counter
@@ -312,29 +315,22 @@ cb_loop2:
 	lw   	$s1 	4($sp)			
 	lw   	$s2 	8($sp)			
 	lw   	$s3 	12($sp)			
-	lw   	$s4 	16($sp)
-	lw	$s5	20($sp)	
-	lw	$s6	24($sp)	
-	lw	$ra	28($sp)			
-	addi	$sp 	$sp 	32			# Move stack pointer
+	lw   	$s4 	16($sp)	
+	lw	$ra	20($sp)			
+	addi	$sp 	$sp 	24			# Move stack pointer
 	jr	$ra
 
 counter_last_byte:
-	addi	$sp 	$sp 	-32			# Move stack pointer
+	addi	$sp 	$sp 	-24			# Move stack pointer
 	sw   	$s0 	($sp)				# Push to stack
 	sw   	$s1 	4($sp)			
 	sw   	$s2 	8($sp)			
 	sw   	$s3 	12($sp)		
-	sw   	$s4 	16($sp)			
-	sw	$s5	20($sp)
-	sw	$s6	24($sp)
-	sw	$ra	28($sp)
+	sw   	$s4 	16($sp)
+	sw	$ra	20($sp)
 	
-	lw	$s6	mask_byte
-	lb	$s0	($a0)				# Load bytes
-	and	$s0	$s0	$s6
-	lb	$s1	($a1)
-	and	$s1	$s1	$s6
+	lbu	$s0	($a0)				# Load bytes
+	lbu	$s1	($a1)
 	move	$s2	$a2
 	li	$s3	7
 	sll	$s0	$s0	8
@@ -381,11 +377,9 @@ clb_loop2:
 	lw   	$s1 	4($sp)			
 	lw   	$s2 	8($sp)			
 	lw   	$s3 	12($sp)			
-	lw   	$s4 	16($sp)
-	lw	$s5	20($sp)	
-	lw	$s6	24($sp)	
-	lw	$ra	28($sp)			
-	addi	$sp 	$sp 	32			# Move stack pointer
+	lw   	$s4 	16($sp)	
+	lw	$ra	20($sp)			
+	addi	$sp 	$sp 	24			# Move stack pointer
 	jr	$ra
 #############################	Minimal	$a0 - array;	$a1 - size
 minimal:
@@ -458,10 +452,10 @@ save_skip:
 	sb	$t1	3($t7)
 	sb	$s4	4($t7)
 	
-	addiu	$s0	$s0	4
+	addiu	$s0	$s0	4			# Increment pointer to next number.
 	addiu	$t7	$t7	5	
 	addiu	$s3	$s3	1
-	bne	$s3	$s1	save_loop
+	bne	$s3	$s1	save_loop		# Run while not encountered end.
 	sb	$zero	($t7)
 
 	li	$v0	13				# Command for open file
