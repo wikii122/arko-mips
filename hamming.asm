@@ -5,26 +5,25 @@
 # Bitmap specification - 64x64, 1bit.
 #####################################
 	.data
-	.align	2
+	.align 	2
+mask1:	.word	0x55555555		# 01010101010101010101010101010101
+mask2:	.word	0x33333333		# 00110011001100110011001100110011
+mask3:	.word	0xF0F0F0F		# 00001111000011110000111100001111
+mask4:	.word	0xFF00FF		# 00000000111111110000000011111111
+mask5:	.word	0xFFFF		# 00000000000000001111111111111111
+
+mask_hamming:	.word	0xFF00	# 00000000000000001111111100000000
+mask_byte:		.word	0xFF		# 00000000000000000000000011111111
+
 file1:		.space	600
 file2:		.space	600
+filesize: 	.word		574
+
+minimum:	.space	4
+
 
 array:		.space 	900
 prints:		.space	1201
-	
-	.align 	2
-minimum:	.space	4
-
-filesize: 	.word		574
-
-mask1:	.word	0x55555555		#01010101010101010101010101010101
-mask2:	.word	0x33333333		#00110011001100110011001100110011
-mask3:	.word	0xF0F0F0F		#00001111000011110000111100001111
-mask4:	.word	0xFF00FF		#00000000111111110000000011111111
-mask5:	.word	0xFFFF		#00000000000000001111111111111111
-
-mask_hamming:	.word	0xFF00	#00000000000000001111111100000000
-mask_byte:		.word	0xFF		#00000000000000000000000011111111
 
 fail:		.asciiz		"[!]Failed to open file"
 path1:   	.asciiz 	"obraz1.bmp"
@@ -33,6 +32,7 @@ path2: 	.asciiz 	"obraz2.bmp"
 res1:		.asciiz		"hamming.txt"
 res2:		.asciiz		"tablica.txt"
 done:		.asciiz		"Done!"
+
         	.text
         	.globl  main
 main:
