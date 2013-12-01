@@ -423,9 +423,12 @@ save:
 	li	$s3	0				# Loop counter
 	move	$t8	$s0
 	la	$t7	prints
-	li	$s4	'\n'
-
+	li	$t9	0
 save_loop:
+	addiu $t9	$t9	1
+	li	$s4	' '
+	beq	$t9	15	new_line
+save_ret:	
 	lw	$t0	($s0)				# Convert to decimal 
 	
 	remu	$t1 	$t0	10
@@ -453,7 +456,7 @@ save_loop:
 	bne	$t2	'0'	save_skip
 	li	$t2	' '
 save_skip:
-	sb	$t4	 0($t7)
+	sb	$t4	0($t7)
 	sb	$t3	1($t7)
 	sb	$t2	2($t7)
 	sb	$t1	3($t7)
@@ -492,4 +495,9 @@ save_skip:
 	lw	$ra	28($sp)			
 	addi	$sp 	$sp 	32			# Move stack pointer
 	jr	$ra
+	
+new_line:
+	li	$s4	'\n'				# Enter end of line
+	li	$t9	0
+	b 	save_ret
 	
