@@ -1,0 +1,85 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{polski}
+\usepackage{indentfirst} 
+\usepackage[margin=2.5cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{dejavu}
+\usepackage{textcomp}
+\usepackage{mathtools}
+
+\newcommand\bitem[1]{\item[\textbullet~#1]}
+
+\title{Projekt Architektura Komputerów MIPS}
+\author{Wiktor Ślęczka}
+
+\date{\today}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Program ma obliczyć odległość Hamminga pomiędzy dwoma 1-bitowymi bitmapami o rozdzielczości~64x64, uwzględniając możliwość
+przesunięcia o 7 pixeli w każdą stronę.
+\end{abstract}
+
+\section{Program}
+\subsection{Opis}
+Program liczy minimalną odległość Hamminga pomiędzy dwoma bitmapami. Zgodnie ze specyfikacją, bitmapa powinna być 1bitowa, oraz
+mieć rodzielczość 64x64. Ogległość należy policzyć dla każdego możliwego przesunięcia z zakresu <-7, 7> pixeli, zarówno poziomo jak
+i pionowo\footnote{Łącznie to 225 kombinacji}. 
+\subsection{Wejście}
+Program wczytuje dwa pliki, 'obraz1.bmp' oraz 'obraz2.bmp', zawierające poprawne 1bitowe bitmapy o rozdzielczości 64x64.
+\subsection{Wyjście}
+Program powinien stworzyć dwa pliki:
+\begin{description}
+ \bitem{hamming.txt} w którym znajduje się najmniejsza znaleziona wartość.
+ \bitem{tablica.txt} w którym znajdują się wszystkie obliczone wartości.
+\end{description}
+lub wypisać odpowiedni komunikat błądu na konsolę.
+
+\section{Struktura programu}
+Program zawiera następujące procedury:
+\begin{description}
+ \bitem{main} główna funkcja programu
+ \bitem{counter} oblicza odległość Hamminga poprzez zawężanie zakresu do kolejno rzędu i półsłowa\footnote{Oryginalnie 'halfword'}, 
+ a następnie zastosowanie w pętli operacji XOR dla wszystkich kombinacji i przesunięć bitów zawartych we wczytanym półsłowie. Operuje się tu 
+ na pojedyńczych bajtach.
+ \bitem{popcount} algorytm zliczania jedynek, wykonywany w wersji dla 32 bitów. Przy pomocy odpowiednich przesunięć i masek
+ każda jedynka traktowana jest jako swój własny licznik, a następnie dodawana do sąsiednich.
+ \bitem{minimal} znajduje najmniejszą wartość wśród obliczonych.
+ \bitem{read} wczytuje plik o podanej nazwie.
+ \bitem{write} zapisuje dany ciąg znaków do pliku.
+\end{description}
+
+\section{Struktury danych}
+\begin{description}
+ \bitem{array} tablica z wynikami obliczeń
+ \bitem{prints} tablica z wynikami obliczeń przekonwertowanymi na ASCII.
+ \bitem{file<*>} miejsce na wczytywane pliki.
+ \bitem{mask<*>} używane w programie maski binarne.
+\end{description}
+
+\section{Algorytmy}
+\subsection{Procedura counter}
+Procedura counter służy obliczeniu odległości Hamminga. Na początek wyszczególnia dwa wiersze, następnie dla każdego bitu poza ostatnim  
+wczytuje kolejne dwa bity w odwrotnej kolejność niż w pamięci\footnote{Ponieważ bajty są przechowywane w postaci Little-Endian.}.
+Następnie otrzymane półsłowa są przesuwane i obcinane do oktetów bitów, i za pomocą operacji XOR obliczana jest odległość Hamminga dla
+poszczególnych kombinacji oktetów. Powtarzane jest to odpowiednią ilość razy dla kolejnych wierszy, aby otrzymać przesunięcie w pionie.
+Obliczone wartości dodawane są do odpowiedniego pola w tabeli array.
+\subsection{Procedura popcount}
+Procedura popcount służy do zliczania jedynek. Polega ona na trzech prostych krokach. Najpierw należy przesunąć wartość rejestru, który 
+zliczamy o $2^{N-1}$, gdzie N to numer kroku, a następnie zastosować dla obu wartości AND z maską o sicie $2^{N-1}$ i dodać je do siebie.
+Należy powtarzać te kroki aż jeden z rejestrów w pierwszym kroku zostanie wyzerowany.
+W ten sposób każdy bit jest traktowany jako swój licznik, który następnie zlicza 2, 4, 8.. itd. bitów.
+\section{Testy}
+W katalogach test<n> znajdują się testy mające sprawdzić skrajne i klasyczne działanie programu. Są to odpowiednio:
+\begin{enumerate}
+ \item Dwie białe plansze
+ \item Biała plansza z czarną kropką 4x4 w lewym górnym rogu i czysta biała plansza.
+ \item Biała i czarna plansza.
+ \item Biała plansza oraz biała plansza z czarną kropką pośrodku.
+ \item Litera A na białym tle przesunięta względem drugiego obrazka o [-2, 5].
+\end{enumerate}
+W katalogach znajdują się również pliki o rozszerzeniu .res, zawierające prawidłowe rozwiązania.
+\end{document}
