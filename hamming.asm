@@ -55,11 +55,13 @@ main:
 	li	$a1	225				# Size for minimal
 	jal	minimal				# Find minimal hammings distance
 	sw	$v0	minimum			# Save minimal value
+	
 	# Argument remain the same
 	la	$a0	array
 	li	$a1	225
 	la	$a2	res2
 	jal	save					# Save to file
+	
 	la	$a0	minimum
 	li	$a1	1
 	la	$a2	res1		
@@ -123,6 +125,7 @@ read_file:
 	la 	$a1	($t1)				# memory buffer
 	move	$a2	$t2				# size to be read
 	syscall					# Read the file
+	
 	beq 	$zero	$v0 	failed			# If no data was read, exit
 	li 	$v0 	16   				#system call for file_close 
 	# File descriptor already at $a0
@@ -134,20 +137,17 @@ failed:
 	li	$v0	4				# Command to print
 	la	$a0	fail				# String to be printed
 	syscall
+	
 	j	exit
 
 #########################	 Counter count hamming's distance
 counter_main:
 # Prologue
-	addi	$sp 	$sp 	-32			# Move stack pointer
+	addi	$sp 	$sp 	-16			# Move stack pointer
 	sw   	$s0 	($sp)				# Push to stack
 	sw   	$s1 	4($sp)			
-	sw   	$s2 	8($sp)			
-	sw   	$s3 	12($sp)		
-	sw   	$s4 	16($sp)			
-	sw	$s5	20($sp)
-	sw	$s6	24($sp)
-	sw	$ra	28($sp)		
+	sw   	$s2 	8($sp)	
+	sw	$ra	12($sp)		
 	
 	li	$s2	64				# Load loop counter for rows (columns to be specific, as bmp has top-bottom structure) +1
 	move	$s0	$a0				# Copy address of file 1
@@ -161,28 +161,24 @@ counter_loop1:
 	jal	counter_vertical
 	addiu	$s2	$s2	-1			# Decrement loop counter
 	bnez	$s2	counter_loop1		# Finish if loop1 counter equals 0
+
 # Epilogue	
 	lw   	$s0 	($sp)				# Pop to stack
 	lw   	$s1 	4($sp)			
-	lw   	$s2 	8($sp)			
-	lw   	$s3 	12($sp)			
-	lw   	$s4 	16($sp)
-	lw	$s5	20($sp)	
-	lw	$s6	24($sp)	
-	lw	$ra	28($sp)			
-	addi	$sp 	$sp 	32			# Move stack pointer
+	lw   	$s2 	8($sp)	
+	lw	$ra	12($sp)			
+	addi	$sp 	$sp 	16			# Move stack pointer
 	jr	$ra					# Return
 	
 counter_vertical:
-	addi	$sp 	$sp 	-32			# Move stack pointer
+	addi	$sp 	$sp 	-28			# Move stack pointer
 	sw   	$s0 	($sp)				# Push to stack
 	sw   	$s1 	4($sp)			
 	sw   	$s2 	8($sp)			
 	sw   	$s3 	12($sp)		
 	sw   	$s4 	16($sp)			
 	sw	$s5	20($sp)
-	sw	$s6	24($sp)
-	sw	$ra	28($sp)
+	sw	$ra	24($sp)
 
 	addiu	$s0	$a0	-56			# Set file1 start at -7 lines
 	move	$s1	$a1				# file2
@@ -210,21 +206,17 @@ cv_continue:
 	lw   	$s3 	12($sp)			
 	lw   	$s4 	16($sp)
 	lw	$s5	20($sp)	
-	lw	$s6	24($sp)	
-	lw	$ra	28($sp)			
-	addi	$sp 	$sp 	32			# Move stack pointer
+	lw	$ra	24($sp)			
+	addi	$sp 	$sp 	28			# Move stack pointer
 	jr	$ra
 	
 counter_row:
-	addi	$sp 	$sp 	-32			# Move stack pointer
+	addi	$sp 	$sp 	-20			# Move stack pointer
 	sw   	$s0 	($sp)				# Push to stack
 	sw   	$s1 	4($sp)			
 	sw   	$s2 	8($sp)			
-	sw   	$s3 	12($sp)		
-	sw   	$s4 	16($sp)			
-	sw	$s5	20($sp)
-	sw	$s6	24($sp)
-	sw	$ra	28($sp)
+	sw   	$s3 	12($sp)
+	sw	$ra	16($sp)
 	
 	move	$s0	$a0				# Move argument
 	move	$s1	$a1
@@ -235,6 +227,7 @@ cr_loop:
 	move	$a1	$s1
 	move	$a2	$s2
 	jal	counter_byte
+	
 	addiu	$s0	$s0	1			# Next byte
 	addiu	$s1	$s1	1
 	addiu	$s3	$s3	-1			# Decrement loop counter
@@ -248,12 +241,10 @@ cr_loop:
 	lw   	$s0 	($sp)				# Pop to stack
 	lw   	$s1 	4($sp)			
 	lw   	$s2 	8($sp)			
-	lw   	$s3 	12($sp)			
-	lw   	$s4 	16($sp)
-	lw	$s5	20($sp)	
-	lw	$s6	24($sp)	
-	lw	$ra	28($sp)			
-	addi	$sp 	$sp 	32			# Move stack pointer
+	lw   	$s3 	12($sp)	
+	lw	$ra	16($sp)			
+	addi	$sp 	$sp 	20			# Move stack pointer
+	
 	jr	$ra
 counter_byte:
 	addi	$sp 	$sp 	-32			# Move stack pointer
@@ -293,6 +284,7 @@ cb_loop1:
 	and	$t1	$t1	$s4
 	xor	$a0	$t0	$t1			# Show different bits
 	jal	popcount
+	
 	lw	$t4	($s2)				# Load prevoisly saved result
 	addu	$t4	$t4	$v0			# Add result from popcount
 	sw	$t4	($s2)
@@ -308,6 +300,7 @@ cb_loop2:
 	and	$t1	$t1	$s4
 	xor	$a0	$t0	$t1			# Show different bits
 	jal	popcount
+	
 	lw	$t4	($s2)				# Load prevoisly saved result
 	addu	$t4	$t4	$v0			# Add result from popcount
 	sw	$t4	($s2)
@@ -325,6 +318,7 @@ cb_loop2:
 	lw	$ra	28($sp)			
 	addi	$sp 	$sp 	32			# Move stack pointer
 	jr	$ra
+
 counter_last_byte:
 	addi	$sp 	$sp 	-32			# Move stack pointer
 	sw   	$s0 	($sp)				# Push to stack
@@ -357,6 +351,7 @@ clb_loop1:
 	srlv	$t0	$t0	$s3			# And return by n right
 	xor	$a0	$t1	$t0
 	jal 	popcount
+	
 	lw	$t4	($s2)
 	addu	$t4	$t4	$v0
 	sw	$t4	($s2)
@@ -374,6 +369,7 @@ clb_loop2:
 	srlv	$t1	$t1	$s3			# And return by n right
 	xor	$a0	$t1	$t0
 	jal 	popcount
+	
 	lw	$t4	($s2)
 	addu	$t4	$t4	$v0
 	sw	$t4	($s2)
@@ -409,15 +405,13 @@ minimal_no_switch:
 
 ############################# 	Save	$a0 - array; $a1 - size;	$a2 - name;
 save:
-	addi	$sp 	$sp 	-32			# Move stack pointer
+	addi	$sp 	$sp 	-24			# Move stack pointer
 	sw   	$s0 	($sp)				# Push to stack
 	sw   	$s1 	4($sp)			
 	sw   	$s2 	8($sp)			
 	sw   	$s3 	12($sp)		
-	sw   	$s4 	16($sp)			
-	sw	$s5	20($sp)
-	sw	$s6	24($sp)
-	sw	$ra	28($sp)
+	sw   	$s4 	16($sp)
+	sw	$ra	20($sp)
 
 	move	$s0	$a0				# Save arguments
 	move	$s1	$a1
@@ -491,11 +485,9 @@ save_skip:
 	lw   	$s1 	4($sp)			
 	lw   	$s2 	8($sp)			
 	lw   	$s3 	12($sp)			
-	lw   	$s4 	16($sp)
-	lw	$s5	20($sp)	
-	lw	$s6	24($sp)	
-	lw	$ra	28($sp)			
-	addi	$sp 	$sp 	32			# Move stack pointer
+	lw   	$s4 	16($sp)	
+	lw	$ra	20($sp)			
+	addi	$sp 	$sp 	24			# Move stack pointer
 	jr	$ra
 	
 new_line:
