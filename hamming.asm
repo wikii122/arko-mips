@@ -4,13 +4,15 @@
 # Program counting Hamming's distance between two bitmaps, with intershifts.
 # Bitmap specification - 64x64, 1bit.
 #####################################
-        .data
-        .align	2
+	.data
+	.align	2
 file1:		.space	600
 file2:		.space	600
 
 array:		.space 	900
-prints:		.space	1200
+prints:		.space	1201
+	
+	.align 	2
 minimum:	.space	4
 
 filesize: 	.word		574
@@ -73,36 +75,36 @@ exit:
 	
 ##########################	Population counter - $a0	- target,
 popcount:
-	move	$t1	$a0		# Load word to register
-	lw	$t0	mask1	# Load first mask
-	srl	$t2	$t1	1	# Bit shift one right
-	and	$t3	$t0	$t1	# Apply mask
-	and	$t4	$t0	$t2	# Apply mask to shifted
-	addu	$t1	$t3	$t4	# Add results of applied masks
-	lw	$t0	mask2	# Load second mask
-	srl	$t2	$t1	2	# Bitshift by two right
-	and	$t3	$t0	$t1	# Apply mask 
-	and	$t4	$t0	$t2	# Apply mask to shifted
-	addu	$t1	$t3	$t4	# Add results of applied masks
-	lw	$t0	mask3	# Load third mask
-	srl	$t2	$t1	4	# Bitshift by 4 right
-	and	$t3	$t0	$t1	# Apply mask
-	and	$t4	$t0	$t2	# Apply mask to shifted
-	addu	$t1	$t3	$t4	# Add results of applied masks
-	lw	$t0	mask4	# Load fourth mask
-	srl	$t2	$t1	8	# Bitshift by 8 right
-	and	$t3	$t0	$t1	# Apply mask
-	and	$t4	$t0	$t2	# Apply mask o shifted
-	addu	$t1	$t3	$t4	# Add results of applied masks
-	lw	$t0	mask5	# Load fifth mask
-	srl	$t2	$t1	16	# Bitshift by 16 right
-	and	$t3	$t0	$t1	# Apply mask
-	and 	$t4	$t0	$t2	# Apply mask to shifted
-	addu	$t1	$t3	$t4	# Add results off applied masks
-	move	$v0	$t1		# Move result to $v0
-	jr	$ra			# Return
+	move	$t1	$a0				# Load word to register
+	lw	$t0	mask1			# Load first mask
+	srl	$t2	$t1	1			# Bit shift one right
+	and	$t3	$t0	$t1			# Apply mask
+	and	$t4	$t0	$t2			# Apply mask to shifted
+	addu	$t1	$t3	$t4			# Add results of applied masks
+	lw	$t0	mask2			# Load second mask
+	srl	$t2	$t1	2			# Bitshift by two right
+	and	$t3	$t0	$t1			# Apply mask 
+	and	$t4	$t0	$t2			# Apply mask to shifted
+	addu	$t1	$t3	$t4			# Add results of applied masks
+	lw	$t0	mask3			# Load third mask
+	srl	$t2	$t1	4			# Bitshift by 4 right
+	and	$t3	$t0	$t1			# Apply mask
+	and	$t4	$t0	$t2			# Apply mask to shifted
+	addu	$t1	$t3	$t4			# Add results of applied masks
+	lw	$t0	mask4			# Load fourth mask
+	srl	$t2	$t1	8			# Bitshift by 8 right
+	and	$t3	$t0	$t1			# Apply mask
+	and	$t4	$t0	$t2			# Apply mask o shifted
+	addu	$t1	$t3	$t4			# Add results of applied masks
+	lw	$t0	mask5			# Load fifth mask
+	srl	$t2	$t1	16			# Bitshift by 16 right
+	and	$t3	$t0	$t1			# Apply mask
+	and 	$t4	$t0	$t2			# Apply mask to shifted
+	addu	$t1	$t3	$t4			# Add results off applied masks
+	move	$v0	$t1				# Move result to $v0
+	jr	$ra					# Return
 	
-#############################	READ FILE TO MEMORY - a0 - file name; a1 - memory address; a2 - size
+#########################	Read file from memory - a0 - file name; a1 - memory address; a2 - size
 read_file:
 	move	$t1	$a1				#save register a1
 	move	$t2	$a2				#save register a2
@@ -123,7 +125,7 @@ read_file:
 	syscall					# Read the file
 	beq 	$zero	$v0 	failed			# If no data was read, exit
 	li 	$v0 	16   				#system call for file_close 
-	# File descriptor at $a0
+	# File descriptor already at $a0
 	syscall 
 	
 	jr	$ra					# Return jump
@@ -134,7 +136,7 @@ failed:
 	syscall
 	j	exit
 
-############################# Counter count hamming's distance
+#########################	 Counter count hamming's distance
 counter_main:
 # Prologue
 	addi	$sp 	$sp 	-32			# Move stack pointer
@@ -158,7 +160,7 @@ counter_loop1:
 	addiu	$s1	$s1	8
 	jal	counter_vertical
 	addiu	$s2	$s2	-1			# Decrement loop counter
-	bnez	$s2	counter_loop1		# Finish if loop1 counter == 0
+	bnez	$s2	counter_loop1		# Finish if loop1 counter equals 0
 # Epilogue	
 	lw   	$s0 	($sp)				# Pop to stack
 	lw   	$s1 	4($sp)			
@@ -444,20 +446,20 @@ save_ret:
 	
 	divu	$t4	$t0	1000
 	
-	addu	$t1	$t1	'0'
-	addu	$t2	$t2	'0'
-	addu	$t3	$t3	'0'
-	addu	$t4	$t4	'0'
+	addu	$t1	$t1	'0'			# For every digit
+	addu	$t2	$t2	'0'			# add value of zero character
+	addu	$t3	$t3	'0'			# to become valid ASCII
+	addu	$t4	$t4	'0'			# digit number.
 	
-	bne	$t4	'0'	save_skip
-	li	$t4	' '
+	bne	$t4	'0'	save_skip		# Strip zeroes from begining
+	li	$t4	' '				# of output.
 	bne	$t3	'0'	save_skip
 	li	$t3	' '
 	bne	$t2	'0'	save_skip
 	li	$t2	' '
 save_skip:
-	sb	$t4	0($t7)
-	sb	$t3	1($t7)
+	sb	$t4	0($t7)				# Save output in appropiate
+	sb	$t3	1($t7)				# space.
 	sb	$t2	2($t7)
 	sb	$t1	3($t7)
 	sb	$s4	4($t7)
