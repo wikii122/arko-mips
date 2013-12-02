@@ -13,8 +13,8 @@
 
 \title{Projekt Architektura Komputerów MIPS}
 \author{Wiktor Ślęczka}
-
 \date{\today}
+
 \begin{document}
 \maketitle
 
@@ -67,6 +67,21 @@ wczytuje kolejne dwa bity w odwrotnej kolejność niż w pamięci\footnote{Ponie
 Następnie otrzymane półsłowa są przesuwane i obcinane do oktetów bitów, i za pomocą operacji XOR obliczana jest odległość Hamminga dla
 poszczególnych kombinacji oktetów. Powtarzane jest to odpowiednią ilość razy dla kolejnych wierszy, aby otrzymać przesunięcie w pionie.
 Obliczone wartości dodawane są do odpowiedniego pola w tabeli array.
+
+Procedura ta wywołuje następujące podprocedury:
+\begin{description}
+ \bitem{counter\_vertical} iteruje po wierszach w drugim pliku. Dla danego wiersza z pliku 1 iteruje po wierszach w pliku
+ drugim w granicach przesunięcia z zakresu <-7, 7> wierszy względem danego. Wiersze powyżej/poniżej końca wiersza są ignorowane.
+ Dla każdej znalezionej pary wierszy uruchamiana jest procedura counter\_row.
+ \bitem{counter\_row} jej zadaniem jest uruchomienie dla każdego bajtu podanych wierszy procedury counter\_byte, za wyjątkiem ostatniego,
+ który jest rozpatrywany oddzielnie za pomocą procedury counter\_last\_byte.
+ \bitem{counter\_byte} Wczytuje do pamięci dwa następujące bajty, a następnie, odpowiednio je przesuwając oraz stosując maskę dłudości bity,
+ wykonuje operację XOR dla wszystkich możliwych poprawnych przesunięć w zakresie <-7, 7> bitów. Następnie zlicza jedynki w otrzymanym
+ wyniku oraz dodaje wynik do uprzednio otrzymanego.
+ \bitem{counter\_last\_byte} Funkcja analogiczna do counter\_byte, ale biorąca pod uwagę fakt, że po pierwszym bajcie zaczyna się następny wiersz.
+ Wczytuje tylko jeden bajt oraz obcina go do interesujących fragmentów przed wykonaniem operacji XOR dla wszystkich przesunięć.
+\end{description}
+
 \subsection{Procedura popcount}
 Procedura popcount służy do zliczania jedynek. Polega ona na trzech prostych krokach. Najpierw należy przesunąć wartość rejestru, który 
 zliczamy o $2^{N-1}$, gdzie N to numer kroku, a następnie zastosować dla obu wartości AND z maską o sicie $2^{N-1}$ i dodać je do siebie.
@@ -79,7 +94,7 @@ W katalogach test<n> znajdują się testy mające sprawdzić skrajne i klasyczne
  \item Biała plansza z czarną kropką 4x4 w lewym górnym rogu i czysta biała plansza.
  \item Biała i czarna plansza.
  \item Biała plansza oraz biała plansza z czarną kropką pośrodku.
- \item Litera A na białym tle przesunięta względem drugiego obrazka o [-2, 5].
+ \item Litera A na białym tle przesunięta względem drugiego obrazka o [5, -2].
 \end{enumerate}
-W katalogach znajdują się również pliki o rozszerzeniu .res, zawierające prawidłowe rozwiązania.
+W katalogach znajdują się również pliki o rozszerzeniu .res, zawierające rozwiązania.
 \end{document}
