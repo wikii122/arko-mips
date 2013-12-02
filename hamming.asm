@@ -32,7 +32,28 @@ path2: 	.asciiz 	"obraz2.bmp"
 res1:		.asciiz		"hamming.txt"
 res2:		.asciiz		"tablica.txt"
 done:		.asciiz		"Done!"
-
+.macro prologue()
+	addi	$sp 	$sp 	-32			# Move stack pointer
+	sw   	$s0 	($sp)				# Push to stack
+	sw   	$s1 	4($sp)			
+	sw   	$s2 	8($sp)			
+	sw   	$s3 	12($sp)		
+	sw   	$s4 	16($sp)			
+	sw	$s5	20($sp)
+	sw	$s6	24($sp)
+	sw	$ra	28($sp)
+.end_macro
+.macro epilogue()
+	lw   	$s0 	($sp)				# Pop from stack
+	lw   	$s1 	4($sp)			
+	lw   	$s2 	8($sp)			
+	lw   	$s3 	12($sp)			
+	lw   	$s4 	16($sp)
+	lw	$s5	20($sp)	
+	lw	$s6	24($sp)
+	lw	$ra	28($sp)			
+	addi	$sp 	$sp 	32			# Move stack pointer
+.end_macro
         	.text
         	.globl  main
 main:
@@ -151,12 +172,7 @@ failed:
 
 #########################	 Counter count hamming's distance
 counter_main:
-# Prologue
-	addi	$sp 	$sp 	-16			# Move stack pointer
-	sw   	$s0 	($sp)				# Push to stack
-	sw   	$s1 	4($sp)			
-	sw   	$s2 	8($sp)	
-	sw	$ra	12($sp)		
+	prologue ()
 	
 	li	$s2	64				# Load loop counter for rows (columns to be specific, as bmp has top-bottom structure) +1
 	move	$s0	$a0				# Copy address of file 1
@@ -171,23 +187,11 @@ counter_loop1:
 	addiu	$s2	$s2	-1			# Decrement loop counter
 	bnez	$s2	counter_loop1		# Finish if loop1 counter equals 0
 
-# Epilogue	
-	lw   	$s0 	($sp)				# Pop to stack
-	lw   	$s1 	4($sp)			
-	lw   	$s2 	8($sp)	
-	lw	$ra	12($sp)			
-	addi	$sp 	$sp 	16			# Move stack pointer
+	epilogue ()
 	jr	$ra					# Return
 	
 counter_vertical:
-	addi	$sp 	$sp 	-28			# Move stack pointer
-	sw   	$s0 	($sp)				# Push to stack
-	sw   	$s1 	4($sp)			
-	sw   	$s2 	8($sp)			
-	sw   	$s3 	12($sp)		
-	sw   	$s4 	16($sp)			
-	sw	$s5	20($sp)
-	sw	$ra	24($sp)
+	prologue ()
 
 	addiu	$s0	$a0	-56			# Set file1 start at -7 lines
 	move	$s1	$a1				# file2
@@ -210,23 +214,11 @@ cv_continue:
 	addiu	$s3	$s3	-1			# Decrement loop counter
 	bnez	$s3	cv_loop			# Continue
 	
-	lw   	$s0 	($sp)				# Pop to stack
-	lw   	$s1 	4($sp)			
-	lw   	$s2 	8($sp)			
-	lw   	$s3 	12($sp)			
-	lw   	$s4 	16($sp)
-	lw	$s5	20($sp)	
-	lw	$ra	24($sp)			
-	addi	$sp 	$sp 	28			# Move stack pointer
+	epilogue ()
 	jr	$ra
 	
 counter_row:
-	addi	$sp 	$sp 	-20			# Move stack pointer
-	sw   	$s0 	($sp)				# Push to stack
-	sw   	$s1 	4($sp)			
-	sw   	$s2 	8($sp)			
-	sw   	$s3 	12($sp)
-	sw	$ra	16($sp)
+	prologue ()
 	
 	move	$s0	$a0				# Move argument
 	move	$s1	$a1
@@ -248,22 +240,11 @@ cr_loop:
 	move	$a2	$s2
 	jal	counter_last_byte
 
-	lw   	$s0 	($sp)				# Pop to stack
-	lw   	$s1 	4($sp)			
-	lw   	$s2 	8($sp)			
-	lw   	$s3 	12($sp)	
-	lw	$ra	16($sp)			
-	addi	$sp 	$sp 	20			# Move stack pointer
-	
+	epilogue ()
 	jr	$ra
+	
 counter_byte:
-	addi	$sp 	$sp 	-24			# Move stack pointer
-	sw   	$s0 	($sp)				# Push to stack
-	sw   	$s1 	4($sp)			
-	sw   	$s2 	8($sp)			
-	sw   	$s3 	12($sp)		
-	sw   	$s4 	16($sp)
-	sw	$ra	20($sp)
+	prologue ()
 	
 	lbu	$s0	($a0)				# Load given halfword, 
 	sll	$s0	$s0	8			# as two bytes, in reversed order,
@@ -311,23 +292,11 @@ cb_loop2:
 	addiu	$s3	$s3	-1			# Decrement loop counter
 	bnez	$s3	cb_loop2
 	
-	lw   	$s0 	($sp)				# Pop to stack
-	lw   	$s1 	4($sp)			
-	lw   	$s2 	8($sp)			
-	lw   	$s3 	12($sp)			
-	lw   	$s4 	16($sp)	
-	lw	$ra	20($sp)			
-	addi	$sp 	$sp 	24			# Move stack pointer
+	epilogue ()
 	jr	$ra
 
 counter_last_byte:
-	addi	$sp 	$sp 	-24			# Move stack pointer
-	sw   	$s0 	($sp)				# Push to stack
-	sw   	$s1 	4($sp)			
-	sw   	$s2 	8($sp)			
-	sw   	$s3 	12($sp)		
-	sw   	$s4 	16($sp)
-	sw	$ra	20($sp)
+	prologue ()
 	
 	lbu	$s0	($a0)				# Load bytes
 	lbu	$s1	($a1)
@@ -373,13 +342,7 @@ clb_loop2:
 	addiu	$s3	$s3	1
 	bne	$s3	8	clb_loop2
 	
-	lw   	$s0 	($sp)				# Pop to stack
-	lw   	$s1 	4($sp)			
-	lw   	$s2 	8($sp)			
-	lw   	$s3 	12($sp)			
-	lw   	$s4 	16($sp)	
-	lw	$ra	20($sp)			
-	addi	$sp 	$sp 	24			# Move stack pointer
+	epilogue ()
 	jr	$ra
 #############################	Minimal	$a0 - array;	$a1 - size
 minimal:
@@ -399,13 +362,7 @@ minimal_no_switch:
 
 ############################# 	Save	$a0 - array; $a1 - size;	$a2 - name;
 save:
-	addi	$sp 	$sp 	-24			# Move stack pointer
-	sw   	$s0 	($sp)				# Push to stack
-	sw   	$s1 	4($sp)			
-	sw   	$s2 	8($sp)			
-	sw   	$s3 	12($sp)		
-	sw   	$s4 	16($sp)
-	sw	$ra	20($sp)
+	prologue ()
 
 	move	$s0	$a0				# Save arguments
 	move	$s1	$a1
@@ -472,16 +429,10 @@ save_skip:
 	syscall
 	
 	li 	$v0 	16   				#system call for file_close 
-	# File descriptor at $a0
+	# File descriptor already at $a0
 	syscall 
 
-	lw   	$s0 	($sp)				# Pop to stack
-	lw   	$s1 	4($sp)			
-	lw   	$s2 	8($sp)			
-	lw   	$s3 	12($sp)			
-	lw   	$s4 	16($sp)	
-	lw	$ra	20($sp)			
-	addi	$sp 	$sp 	24			# Move stack pointer
+	epilogue ()
 	jr	$ra
 	
 new_line:
